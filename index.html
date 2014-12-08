@@ -40,6 +40,16 @@
 
   <script type="text/javascript">
     var gl;
+    var shaderProgram;
+    var globalMesh;
+
+    var xRot = 0;
+    var yRot = 45; // q and w
+    var zRot = 0;
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
 
     function initGL(canvas) {
       try {
@@ -89,8 +99,6 @@
       return shader;
     }
 
-    var shaderProgram;
-
     function initShaders() {
       var fragmentShader = getShader(gl, "shader-fs");
       var vertexShader = getShader(gl, "shader-vs");
@@ -116,15 +124,10 @@
       shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
     }
 
-    var mvMatrix = mat4.create();
-    var pMatrix = mat4.create();
-
     function setMatrixUniforms() {
       gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
       gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
-
-    var globalMesh;
 
     function initBuffers(mesh) {
       globalMesh = mesh;
@@ -174,10 +177,6 @@
 
       render(mesh)
     }
-
-    var xRot = 0;
-    var yRot = 45; // q and w
-    var zRot = 0;
 
     function rotateClockwise() {
       yRot -= 10;
