@@ -1,0 +1,265 @@
+<html>
+
+<head>
+<title>Space Invaders 3D</title>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+
+<!-- Obj loader taken from https://github.com/frenchtoast747/webgl-obj-loader -->
+<script type="text/javascript" src="webgl-obj-loader.js"></script>
+<script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+
+<!-- Base gl code taken from http://learningwebgl.com/blog/?p=28 -->
+<script id="shader-fs" type="x-shader/x-fragment">
+  precision mediump float;
+
+  varying vec4 vColor;
+
+  void main(void) {
+    gl_FragColor = vColor;
+  }
+</script>
+
+<!-- Check out
+  http://www.mathematik.uni-marburg.de/~thormae/lectures/graphics1/code/WebGLShaderLightMat/ShaderLightMat.html
+  for help on shaders
+  -->
+<script id="shader-vs" type="x-shader/x-vertex">
+  attribute vec3 aVertexPosition;
+  attribute vec4 aVertexColor;
+
+  uniform mat4 uMVMatrix;
+  uniform mat4 uPMatrix;
+
+  varying vec4 vColor;
+
+  void main(void) {
+    gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+    vColor = aVertexColor;
+  }
+</script>
+
+<script type="text/javascript">
+    var gl;
+    function initGL(canvas) {
+        try {
+            gl = canvas.getContext("webgl");
+            gl.viewportWidth = canvas.width;
+            gl.viewportHeight = canvas.height;
+            gl.enable(gl.DEPTH_TEST);
+            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+        } catch (e) {
+        }
+        if (!gl) {
+            alert("Could not initialise WebGL, sorry :-(");
+        }
+    }
+
+    function getShader(gl, id) {
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+            return null;
+        }
+
+        var str = "";
+        var k = shaderScript.firstChild;
+        while (k) {
+            if (k.nodeType == 3) {
+                str += k.textContent;
+            }
+            k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+            shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+            shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+            return null;
+        }
+
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+            alert(gl.getShaderInfoLog(shader));
+            return null;
+        }
+
+        return shader;
+    }
+
+    var shaderProgram;
+
+    function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+            alert("Could not initialise shaders");
+        }
+
+        gl.useProgram(shaderProgram);
+
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        shaderProgram.vertexColorAttribute = gl.getAttribLocation(shaderProgram, "aVertexColor");
+    	gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
+    }
+
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
+
+    function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    }
+
+    var globalMesh;
+    function initBuffers(mesh) {
+      globalMesh = mesh;
+    	gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        // I am creating the color section here, not sure how that fits with the mesh
+        mesh.colorBuffer = gl.createBuffer();
+	    gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
+	    colors = []
+	    mesh.colorBuffer.itemSize = 4;
+	    mesh.colorBuffer.numItems = mesh.vertexBuffer.numItems;
+
+      colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+
+colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+
+colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+      colors = colors.concat([1, 0, 0, 1.0]);
+
+colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+      colors = colors.concat([0, 1, 0, 1.0]);
+
+colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([0, 0, 1, 1.0]);
+      colors = colors.concat([0, 0, 1, 1.0]);
+
+	    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+
+        /*gl.bindBuffer(gl.ARRAY_BUFFER, mesh.textureBuffer);
+        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);*/
+
+        //gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
+        //gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        render(mesh)
+    }
+
+    var xRot = 0;
+    var yRot = 45;  // q and w
+    var zRot = 0;
+
+    function rotateClockwise() {
+      yRot -= 10;
+      render(globalMesh);
+    }
+
+    function rotateCounterClockwise() {
+      yRot += 10;
+      render(globalMesh);
+    }
+
+    function degToRad(degrees) {
+      return degrees * Math.PI / 180;
+    }
+
+    function render(mesh) {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, [0, 0, -7]);
+
+        mat4.rotate(mvMatrix, degToRad(xRot), [1, 0, 0]);
+        mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
+        mat4.rotate(mvMatrix, degToRad(zRot), [0, 0, 1]);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
+    	gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, mesh.colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+        setMatrixUniforms();
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+        gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
+
+    function initMeshFromHtml(downloadedMesh) {
+        var mesh;
+        if (!downloadedMesh) {
+            alert('Could not parse obj file');
+            return;
+        }
+
+        mesh = downloadedMesh.obj1;
+
+        OBJ.initMeshBuffers(gl, mesh);
+        initBuffers(mesh);
+    }
+
+    function getFile(filename) {
+        OBJ.downloadMeshes({
+            'obj1': filename
+        }, initMeshFromHtml);
+    }
+
+    function webGLStart(filename) {
+        var canvas = document.getElementById("canvas");
+
+        initGL(canvas);
+        initShaders();
+
+        getFile(filename);
+    }
+
+
+</script>
+</head>
+
+<body>
+	Name of local obj file to use:
+	<input id="filename" placeholder="cube.obj"></input>
+	<button onclick="processFileName()">Done</button>
+	<br>
+    <canvas id="canvas" style="border: none;" width="500" height="500"></canvas><br>
+    <button onclick="rotateClockwise()">Rotate clockwise</button>
+    <button onclick="rotateCounterClockwise()">Rotate counter-clockwise</button>
+
+    <script>
+    function processFileName() {
+    	filename = document.getElementById("filename").value;
+    	webGLStart(filename);
+    }
+    </script>
+</body>
+
+</html>

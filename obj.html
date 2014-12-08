@@ -1,0 +1,32 @@
+<html>
+<head>
+    <script type="text/javascript" src="webgl-obj-loader.js"></script>
+    <script type="text/plain" id="my_obj.obj">
+    o triangle.obj
+# Just a lonely triangle
+
+v 0 0 1
+v 0 1 1
+v 1 1 0
+
+f 1 2 3
+
+    </script>
+</head>
+<body>
+    <canvas id="canvas-gl" style="border: none;" width="500" height="500"></canvas>
+    <script type="text/javascript">
+        var canvas = document.getElementById('canvas-gl');
+        var gl = canvas.getContext('webgl');
+        var objStr = document.getElementById('my_obj.obj').innerHTML;
+        var mesh = new OBJ.Mesh(objStr);
+
+        // use the included helper function to initialize the VBOs
+        // if you don't want to use this function, have a look at its
+        // source to see how to use the Mesh instance.
+        OBJ.initMeshBuffers(gl, mesh);
+        // have a look at the initMeshBuffers docs for an exmample of how to
+        // render the model at this point
+        </script>
+</body>
+</html>
