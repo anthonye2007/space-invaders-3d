@@ -233,33 +233,23 @@
       }, initMeshFromHtml);
     }
 
-    function webGLStart(filename) {
+    function webGLStart() {
       var canvas = document.getElementById("canvas");
 
       initGL(canvas);
       initShaders();
 
+      var filename = "cube.obj";
       getFile(filename);
     }
   </script>
 </head>
 
-<body>
-  Name of local obj file to use:
-  <input id="filename" placeholder="cube.obj"></input>
-  <button onclick="processFileName()">Done</button>
-  <br>
+<body onload="webGLStart()">
   <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
   <br>
   <button onclick="rotateClockwise()">Rotate clockwise</button>
   <button onclick="rotateCounterClockwise()">Rotate counter-clockwise</button>
-
-  <script>
-    function processFileName() {
-      filename = document.getElementById("filename").value;
-      webGLStart(filename);
-    }
-  </script>
 </body>
 
 </html>
