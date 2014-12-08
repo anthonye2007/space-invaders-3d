@@ -237,6 +237,16 @@
       render(globalMesh);
     }
 
+    function rotateUp() {
+      xRot += 10;
+      render(globalMesh);
+    }
+
+    function rotateDown() {
+      xRot -= 10;
+      render(globalMesh);
+    }
+
     function degToRad(degrees) {
       return degrees * Math.PI / 180;
     }
@@ -248,6 +258,9 @@
   <br>
   <button onclick="rotateClockwise()">Rotate clockwise</button>
   <button onclick="rotateCounterClockwise()">Rotate counter-clockwise</button>
+  <br>
+  <button onclick="rotateUp()">Rotate up</button>
+  <button onclick="rotateDown()">Rotate down</button>
 </body>
 
 </html>
