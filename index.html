@@ -58,22 +58,10 @@
       // I am creating the color section here, not sure how that fits with the mesh
       mesh.colorBuffer = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
-      colors = []
       mesh.colorBuffer.itemSize = 4;
       mesh.colorBuffer.numItems = mesh.vertexBuffer.numItems;
 
-      // cube has 8 verticies
-      // each vertex will be colored with RGBA
-
-      colors = colors.concat([1, 0, 0, 1.0]); // top left of front
-      colors = colors.concat([0, 1, 0, 1.0]); // top left of back
-      colors = colors.concat([1, 0, 0, 1.0]); // top right of front
-      colors = colors.concat([0, 1, 0, 1.0]); // top right of back
-
-      colors = colors.concat([1, 0, 0, 1.0]); // bottom right of front
-      colors = colors.concat([0, 1, 0, 1.0]); // bottom right of back
-      colors = colors.concat([0, 1, 0, 1.0]); // bottom left of back
-      colors = colors.concat([1, 0, 0, 1.0]); // bottom left of front
+      colors = colorMesh(mesh);
 
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
@@ -89,6 +77,54 @@
       //gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
       render(mesh)
+    }
+
+    function colorMesh(mesh) {
+      function colorRedAndGreen() {
+        // cube has 8 verticies
+        // each vertex will be colored with RGBA
+        colors = colors.concat(RED); // top left of front
+        colors = colors.concat(GREEN); // top left of back
+        colors = colors.concat(RED); // top right of front
+        colors = colors.concat(GREEN); // top right of back
+
+        colors = colors.concat(RED); // bottom right of front
+        colors = colors.concat(GREEN); // bottom right of back
+        colors = colors.concat(GREEN); // bottom left of back
+        colors = colors.concat(RED); // bottom left of front
+      }
+
+      function doColorMesh(color) {
+        for (var i = 0; i < mesh.colorBuffer.numItems; i++) {
+          colors = colors.concat(color);
+        }
+      }
+
+      const RED = [1, 0, 0, 1.0];
+      const GREEN = [0, 1, 0, 1.0];
+      const BLUE = [0, 0, 1, 1.0];
+
+      colors = []
+
+      switch (mesh.color) {
+      case 'red':
+        doColorMesh(RED);
+        break;
+
+      case 'blue':
+        doColorMesh(BLUE);
+        break;
+
+      case 'green':
+        doColorMesh(GREEN);
+        break;
+
+      default:
+        colorRedAndGreen();
+        break;
+      }
+
+      return colors;
     }
 
     function log(msg) {
@@ -199,6 +235,14 @@
 
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      meshes.floor.name = 'floor';
+      meshes.cannon_bottom.name = 'cannon_bottom';
+      meshes.cannon_top.name = 'cannon_top';
+
+      meshes.floor.color = 'red';
+      meshes.cannon_bottom.color = 'blue';
+      meshes.cannon_top.color = 'green';
 
       loadMesh(meshes.floor);
       loadMesh(meshes.cannon_bottom);
