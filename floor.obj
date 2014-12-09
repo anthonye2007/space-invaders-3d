@@ -1,0 +1,11 @@
+# Floor is just a flat square on the bottom (z=0)
+
+v -4 -4 0
+v -4 4 0
+v 4 -4 4
+v 4 4 4
+
+g floor
+s off
+f 9 10 11
+f 10 11 12
