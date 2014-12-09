@@ -62,6 +62,9 @@
       mesh.colorBuffer.itemSize = 4;
       mesh.colorBuffer.numItems = mesh.vertexBuffer.numItems;
 
+      // cube has 8 verticies
+      // each vertex will be colored with RGBA
+
       colors = colors.concat([1, 0, 0, 1.0]); // top left of front
       colors = colors.concat([0, 1, 0, 1.0]); // top left of back
       colors = colors.concat([1, 0, 0, 1.0]); // top right of front
