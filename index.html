@@ -78,9 +78,9 @@
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
       // print color array
-      for (var i = 0; i < colors.length; i += 4) {
+      /*for (var i = 0; i < colors.length; i += 4) {
         log(colors.slice(i, i + 4));
-      }
+      }*/
 
       /*gl.bindBuffer(gl.ARRAY_BUFFER, mesh.textureBuffer);
         gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);*/
@@ -96,9 +96,6 @@
     }
 
     function render(mesh) {
-      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
       mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
       mat4.identity(mvMatrix);
       mat4.translate(mvMatrix, [0, 0, -7]);
@@ -194,22 +191,26 @@
       gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
     }
 
-    function initMeshFromHtml(downloadedMesh) {
-      var mesh;
-      if (!downloadedMesh) {
+    function initMeshFromHtml(meshes) {
+      if (!meshes) {
         alert('Could not parse obj file');
         return;
       }
 
-      mesh = downloadedMesh.obj1;
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-      OBJ.initMeshBuffers(gl, mesh);
-      initBuffers(mesh);
+      OBJ.initMeshBuffers(gl, meshes.floor);
+      initBuffers(meshes.floor);
+
+      OBJ.initMeshBuffers(gl, meshes.cube);
+      initBuffers(meshes.cube);
     }
 
     function getFile(filename) {
       OBJ.downloadMeshes({
-        'obj1': filename
+        'floor': "floor.obj",
+        'cube': "cube.obj"
       }, initMeshFromHtml);
     }
 
@@ -219,8 +220,7 @@
       initGL(canvas);
       initShaders();
 
-      var filename = "floor.obj";
-      getFile(filename);
+      getFile();
     }
 
     function rotateClockwise() {
