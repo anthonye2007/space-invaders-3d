@@ -44,7 +44,7 @@
     var globalMesh;
 
     var xRot = 0;
-    var yRot = 45; // q and w
+    var yRot = 0; // q and w
     var zRot = 0;
 
     var mvMatrix = mat4.create();
@@ -219,7 +219,7 @@
       initGL(canvas);
       initShaders();
 
-      var filename = "cube.obj";
+      var filename = "floor.obj";
       getFile(filename);
     }
 
@@ -250,7 +250,7 @@
 </head>
 
 <body onload="webGLStart()">
-  <canvas id="canvas" style="border: none;" width="500" height="500"></canvas>
+  <canvas id="canvas" style="border: none;" width="1000" height="500"></canvas>
   <br>
   <button onclick="rotateClockwise()">Rotate clockwise</button>
   <button onclick="rotateCounterClockwise()">Rotate counter-clockwise</button>
