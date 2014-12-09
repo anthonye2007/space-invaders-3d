@@ -42,6 +42,7 @@
     var gl;
     var shaderProgram;
     var globalMesh;
+    var allMeshes;
 
     var xRot = 0;
     var yRot = 0; // q and w
@@ -51,32 +52,20 @@
     var pMatrix = mat4.create();
 
     function initBuffers(mesh) {
-      globalMesh = mesh;
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
-      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(mesh.vertices), gl.STATIC_DRAW);
 
-      // I am creating the color section here, not sure how that fits with the mesh
       mesh.colorBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
       mesh.colorBuffer.itemSize = 4;
       mesh.colorBuffer.numItems = mesh.vertexBuffer.numItems;
 
       colors = colorMesh(mesh);
 
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
 
-      // print color array
-      /*for (var i = 0; i < colors.length; i += 4) {
-        log(colors.slice(i, i + 4));
-      }*/
-
-      /*gl.bindBuffer(gl.ARRAY_BUFFER, mesh.textureBuffer);
-        gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, mesh.textureBuffer.itemSize, gl.FLOAT, false, 0, 0);*/
-
-      //gl.bindBuffer(gl.ARRAY_BUFFER, mesh.normalBuffer);
-      //gl.vertexAttribPointer(shaderProgram.vertexNormalAttribute, mesh.normalBuffer.itemSize, gl.FLOAT, false, 0, 0);
-
-      render(mesh)
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(mesh.indices), gl.STATIC_DRAW);
     }
 
     function colorMesh(mesh) {
@@ -140,13 +129,25 @@
       mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
       mat4.rotate(mvMatrix, degToRad(zRot), [0, 0, 1]);
 
+      // adapted from  https://developer.mozilla.org/samples/webgl/sample5/index.html
+      gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
+      gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, mesh.vertexBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.colorBuffer);
       gl.vertexAttribPointer(shaderProgram.vertexColorAttribute, mesh.colorBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
-      setMatrixUniforms();
-
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, mesh.indexBuffer);
+      setMatrixUniforms();
       gl.drawElements(gl.TRIANGLES, mesh.indexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+    }
+
+    function drawScene() {
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+      for (var mesh in allMeshes) {
+        render(allMeshes[mesh]);
+      }
     }
 
     function initGL(canvas) {
@@ -233,9 +234,6 @@
         return;
       }
 
-      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
       meshes.floor.name = 'floor';
       meshes.cannon_bottom.name = 'cannon_bottom';
       meshes.cannon_top.name = 'cannon_top';
@@ -244,9 +242,11 @@
       meshes.cannon_bottom.color = 'blue';
       meshes.cannon_top.color = 'green';
 
-      loadMesh(meshes.floor);
-      loadMesh(meshes.cannon_bottom);
-      loadMesh(meshes.cannon_top);
+      allMeshes = meshes;
+
+      for (var mesh in allMeshes) {
+        loadMesh(allMeshes[mesh]);
+      }
     }
 
     function loadMesh(mesh) {
@@ -254,7 +254,7 @@
       initBuffers(mesh);
     }
 
-    function getFile(filename) {
+    function downloadMeshes(filename) {
       OBJ.downloadMeshes({
         'floor': "floor.obj",
         'cannon_bottom': "cannon_bottom.obj",
@@ -268,7 +268,9 @@
       initGL(canvas);
       initShaders();
 
-      getFile();
+      downloadMeshes();
+
+      setInterval(drawScene, 15);
     }
 
     function rotateClockwise() {
