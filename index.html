@@ -7,6 +7,7 @@
   <!-- Obj loader taken from https://github.com/frenchtoast747/webgl-obj-loader -->
   <script type="text/javascript" src="webgl-obj-loader.js"></script>
   <script type="text/javascript" src="glMatrix-0.9.5.min.js"></script>
+  <script type="text/javascript" src="mousetrap.min.js"></script>
 
   <!-- Base gl code taken from http://learningwebgl.com/blog/?p=28 -->
   <script id="shader-fs" type="x-shader/x-fragment">
@@ -50,6 +51,13 @@
 
     var mvMatrix = mat4.create();
     var pMatrix = mat4.create();
+
+    var cannon_move = {
+      left: false,
+      right: false,
+      away: false,
+      towards: false
+    };
 
     function initBuffers(mesh) {
       gl.bindBuffer(gl.ARRAY_BUFFER, mesh.vertexBuffer);
@@ -123,7 +131,7 @@
     function render(mesh) {
       mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
       mat4.identity(mvMatrix);
-      mat4.translate(mvMatrix, [0, 0, -7]);
+      mat4.translate(mvMatrix, [mesh.translation.x, mesh.translation.y, mesh.translation.z]);
 
       mat4.rotate(mvMatrix, degToRad(xRot), [1, 0, 0]);
       mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
@@ -145,8 +153,30 @@
       gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+      if (cannon_move.left === true) {
+        allMeshes.cannon_bottom.translation.x -= 1;
+        allMeshes.cannon_top.translation.x -= 1;
+        cannon_move.left = false;
+      }
+      if (cannon_move.right === true) {
+        allMeshes.cannon_bottom.translation.x += 1;
+        allMeshes.cannon_top.translation.x += 1;
+        cannon_move.right = false;
+      }
+      if (cannon_move.away === true) {
+        allMeshes.cannon_bottom.translation.z -= 1;
+        allMeshes.cannon_top.translation.z -= 1;
+        cannon_move.away = false;
+      }
+      if (cannon_move.towards === true) {
+        allMeshes.cannon_bottom.translation.z += 1;
+        allMeshes.cannon_top.translation.z += 1;
+        cannon_move.towards = false;
+      }
+
       for (var mesh in allMeshes) {
-        render(allMeshes[mesh]);
+        object = allMeshes[mesh];
+        render(object);
       }
     }
 
@@ -252,6 +282,11 @@
     function loadMesh(mesh) {
       OBJ.initMeshBuffers(gl, mesh);
       initBuffers(mesh);
+      mesh.translation = {
+        x: 0,
+        y: 0,
+        z: -4
+      };
     }
 
     function downloadMeshes(filename) {
@@ -296,6 +331,22 @@
     function degToRad(degrees) {
       return degrees * Math.PI / 180;
     }
+
+    Mousetrap.bind('left', function () {
+      cannon_move.left = true;
+    });
+
+    Mousetrap.bind('right', function () {
+      cannon_move.right = true;
+    });
+
+    Mousetrap.bind('up', function () {
+      cannon_move.away = true;
+    });
+
+    Mousetrap.bind('down', function () {
+      cannon_move.towards = true;
+    });
   </script>
 </head>
 
