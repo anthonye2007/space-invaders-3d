@@ -52,6 +52,8 @@
     var mvMatrix = mat4.create();
     var pMatrix = mat4.create();
 
+    var time = 0;
+
     var cannon_move = {
       left: false,
       right: false,
@@ -174,18 +176,16 @@
         cannon_move.towards = false;
       }
 
-      var xAlienStart = -3;
-      var yAlienStart = 1;
-      var spacing = 0.5
+      // make aliens move every 500ms
+      if (time >= 500) {
+        time = 0;
 
-      // translate all aliens
-      for (var mesh in allMeshes) {
-        if (isAlien(mesh)) {
-          // put 0th alien at top left
-          alien = allMeshes[mesh];
+        for (var mesh in allMeshes) {
+          if (isAlien(mesh)) {
+            alien = allMeshes[mesh];
 
-          alien.translation.x = xAlienStart + alien.alienPosition * spacing;
-          alien.translation.y = yAlienStart;
+            alien.translation.x += 0.5;
+          }
         }
       }
 
@@ -195,6 +195,8 @@
         object = allMeshes[mesh];
         render(object);
       }
+
+      time += 15;
     }
 
     function initGL(canvas) {
@@ -289,8 +291,6 @@
       meshes.cannon_bottom.color = 'blue';
       meshes.cannon_top.color = 'blue';
 
-      //      meshes.alien.name = 'alien'; // meshes.alien.color = 'red';
-
       var numAliens = 0;
       for (var mesh in meshes) {
         if (isAlien(mesh)) {
@@ -304,11 +304,26 @@
         }
       }
 
-      allMeshes = meshes;
-
-      for (var mesh in allMeshes) {
-        loadMesh(allMeshes[mesh]);
+      for (var mesh in meshes) {
+        loadMesh(meshes[mesh]);
       }
+
+      var xAlienStart = -3;
+      var yAlienStart = 1;
+      var spacing = 0.5
+
+      // translate all aliens
+      for (var mesh in meshes) {
+        if (isAlien(mesh)) {
+          // put 0th alien at top left
+          alien = meshes[mesh];
+
+          alien.translation.x = xAlienStart + alien.alienPosition * spacing;
+          alien.translation.y = yAlienStart;
+        }
+      }
+
+      allMeshes = meshes;
     }
 
     function isAlien(mesh) {
