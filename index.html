@@ -174,8 +174,22 @@
         cannon_move.towards = false;
       }
 
-      allMeshes.alien.translation.y = 1;
-      allMeshes.alien.translation.x = -1;
+      var xAlienStart = -3;
+      var yAlienStart = 1;
+      var spacing = 0.5
+
+      // translate all aliens
+      for (var mesh in allMeshes) {
+        if (isAlien(mesh)) {
+          // put 0th alien at top left
+          alien = allMeshes[mesh];
+
+          alien.translation.x = xAlienStart + alien.alienPosition * spacing;
+          alien.translation.y = yAlienStart;
+        }
+      }
+
+
 
       for (var mesh in allMeshes) {
         object = allMeshes[mesh];
@@ -275,14 +289,39 @@
       meshes.cannon_bottom.color = 'blue';
       meshes.cannon_top.color = 'blue';
 
-      meshes.alien.name = 'alien';
-      meshes.alien.color = 'red';
+      //      meshes.alien.name = 'alien'; // meshes.alien.color = 'red';
+
+      var numAliens = 0;
+      for (var mesh in meshes) {
+        if (isAlien(mesh)) {
+          alien = meshes[mesh];
+
+          alien.name = 'alien' + numAliens;
+          alien.color = 'red';
+          alien.alienPosition = numAliens;
+
+          numAliens++;
+        }
+      }
 
       allMeshes = meshes;
 
       for (var mesh in allMeshes) {
         loadMesh(allMeshes[mesh]);
       }
+    }
+
+    function isAlien(mesh) {
+      return containsStr(mesh, 'alien');
+    }
+
+    function containsStr(first, other) {
+      if (first.indexOf(other) > -1) {
+        return true;
+      } else {
+        return false;
+      }
+
     }
 
     function loadMesh(mesh) {
@@ -300,7 +339,8 @@
         'floor': "floor.obj",
         'cannon_bottom': "cannon_bottom.obj",
         'cannon_top': "cannon_top.obj",
-        'alien': "alien.obj"
+        'alien': "alien.obj",
+        'alien2': "alien.obj"
       }, initMeshFromHtml);
     }
 
