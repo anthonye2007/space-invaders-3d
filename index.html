@@ -174,6 +174,9 @@
         cannon_move.towards = false;
       }
 
+      allMeshes.alien.translation.y = 1;
+      allMeshes.alien.translation.x = -1;
+
       for (var mesh in allMeshes) {
         object = allMeshes[mesh];
         render(object);
@@ -268,9 +271,12 @@
       meshes.cannon_bottom.name = 'cannon_bottom';
       meshes.cannon_top.name = 'cannon_top';
 
-      meshes.floor.color = 'red';
+      meshes.floor.color = 'green';
       meshes.cannon_bottom.color = 'blue';
-      meshes.cannon_top.color = 'green';
+      meshes.cannon_top.color = 'blue';
+
+      meshes.alien.name = 'alien';
+      meshes.alien.color = 'red';
 
       allMeshes = meshes;
 
@@ -293,7 +299,8 @@
       OBJ.downloadMeshes({
         'floor': "floor.obj",
         'cannon_bottom': "cannon_bottom.obj",
-        'cannon_top': "cannon_top.obj"
+        'cannon_top': "cannon_top.obj",
+        'alien': "alien.obj"
       }, initMeshFromHtml);
     }
 
