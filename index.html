@@ -52,7 +52,8 @@
     var mvMatrix = mat4.create();
     var pMatrix = mat4.create();
 
-    var time = 0;
+    var elapsedTime = 0;
+    var alienMovementTime = 500; // ms
 
     var cannon_move = {
       left: false,
@@ -152,9 +153,6 @@
     }
 
     function drawScene() {
-      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
       if (cannon_move.left === true) {
         allMeshes.cannon_bottom.translation.x -= 1;
         allMeshes.cannon_top.translation.x -= 1;
@@ -177,26 +175,61 @@
       }
 
       // make aliens move every 500ms
-      if (time >= 500) {
-        time = 0;
+      if (elapsedTime >= alienMovementTime) {
+        elapsedTime = 0;
 
         for (var mesh in allMeshes) {
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
 
-            alien.translation.x += 0.5;
+            var spacing = 0.5;
+
+            // check if at edge of screen
+            if ((alien.direction > 0 && alien.translation.x >= 2.5) || (alien.direction < 0 && alien.translation.x <= -2.5)) {
+              log("Direction: " + alien.direction + "\tx: " + alien.translation.x);
+              for (var obj in allMeshes) {
+                if (isAlien(obj)) {
+                  otherAlien = allMeshes[obj];
+
+                  // move all aliens down one row
+                  otherAlien.translation.y -= spacing;
+
+                  if (otherAlien.translation.y <= -1) {
+                    alert("You lost...");
+                    return;
+                  }
+
+                  // then reverse direction of movement
+                  otherAlien.direction *= -1;
+
+                  // and increase movement speed
+                  alienMovementTime -= 100;
+
+                  // put lower bound on movement speed
+                  if (alienMovementTime < 100) {
+                    alienMovementTime = 100;
+                  }
+                }
+              }
+            }
+
+            alien.translation.x += spacing * alien.direction;
+            //log(alien.translation.x);
           }
         }
       }
 
-
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       for (var mesh in allMeshes) {
         object = allMeshes[mesh];
         render(object);
       }
 
-      time += 15;
+      elapsedTime += 15;
+
+      setTimeout(drawScene, 15);
     }
 
     function initGL(canvas) {
@@ -299,6 +332,7 @@
           alien.name = 'alien' + numAliens;
           alien.color = 'red';
           alien.alienPosition = numAliens;
+          alien.direction = 1; // move right at start
 
           numAliens++;
         }
@@ -367,7 +401,7 @@
 
       downloadMeshes();
 
-      setInterval(drawScene, 15);
+      setTimeout(drawScene, 100);
     }
 
     function rotateClockwise() {
