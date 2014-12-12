@@ -59,7 +59,8 @@
       left: false,
       right: false,
       away: false,
-      towards: false
+      towards: false,
+      fire: false
     };
 
     function initBuffers(mesh) {
@@ -103,6 +104,7 @@
       const RED = [1, 0, 0, 1.0];
       const GREEN = [0, 1, 0, 1.0];
       const BLUE = [0, 0, 1, 1.0];
+      const WHITE = [1, 1, 1, 1.0];
 
       colors = []
 
@@ -117,6 +119,10 @@
 
       case 'green':
         doColorMesh(GREEN);
+        break;
+
+      case 'white':
+        doColorMesh(WHITE);
         break;
 
       default:
@@ -174,6 +180,30 @@
         cannon_move.towards = false;
       }
 
+      // launch cannon bullet
+      if (cannon_move.fire === true) {
+        // only allow one bullet on screen at a time
+        if (allMeshes.cannon_bullet.isActive === false) {
+          allMeshes.cannon_bullet.translation.x = allMeshes.cannon_top.translation.x;
+          allMeshes.cannon_bullet.translation.z = allMeshes.cannon_top.translation.z;
+
+          allMeshes.cannon_bullet.isActive = true;
+        }
+
+        cannon_move.fire = false;
+      }
+
+      // move cannon bullet
+      if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
+        allMeshes.cannon_bullet.translation.y += 0.01;
+
+        // stop bullet if reach upper boundary
+        if (allMeshes.cannon_bullet.translation.y >= 2) {
+          allMeshes.cannon_bullet.isActive = false;
+          allMeshes.cannon_bullet.translation.y = allMeshes.cannon_top.translation.y;
+        }
+      }
+
       // make aliens move every 500ms
       if (elapsedTime >= alienMovementTime) {
         elapsedTime = 0;
@@ -224,7 +254,9 @@
 
       for (var mesh in allMeshes) {
         object = allMeshes[mesh];
-        render(object);
+        if (object.isActive === undefined || object.isActive === true) {
+          render(object);
+        }
       }
 
       elapsedTime += 15;
@@ -324,6 +356,10 @@
       meshes.cannon_bottom.color = 'blue';
       meshes.cannon_top.color = 'blue';
 
+      meshes.cannon_bullet.name = 'cannon_bullet';
+      meshes.cannon_bullet.color = 'white';
+      meshes.cannon_bullet.isActive = false;
+
       var numAliens = 0;
       for (var mesh in meshes) {
         if (isAlien(mesh)) {
@@ -388,6 +424,7 @@
         'floor': "floor.obj",
         'cannon_bottom': "cannon_bottom.obj",
         'cannon_top': "cannon_top.obj",
+        'cannon_bullet': "cannon_bullet.obj",
         'alien': "alien.obj",
         'alien2': "alien.obj"
       }, initMeshFromHtml);
@@ -442,6 +479,10 @@
 
     Mousetrap.bind('down', function () {
       cannon_move.towards = true;
+    });
+
+    Mousetrap.bind('space', function () {
+      cannon_move.fire = true;
     });
   </script>
 </head>
