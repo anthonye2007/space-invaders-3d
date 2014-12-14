@@ -167,6 +167,8 @@
 
       moveAllAliens();
 
+      checkForPlayerWin();
+
       resetScene();
       renderAllObjects();
 
@@ -174,6 +176,32 @@
 
       if (playerWon === undefined) {
         setTimeout(drawScene, 15);
+      } else if (playerWon === true) {
+        log("You won!!");
+        alert("You won!!");
+      }
+    }
+
+    function checkForPlayerWin() {
+      if (!allMeshes) {
+        return;
+      }
+
+      var areAllAliensDead = true;
+
+      for (var mesh in allMeshes) {
+        if (isAlien(mesh)) {
+          alien = allMeshes[mesh];
+
+          if (alien.isActive !== false) {
+            areAllAliensDead = false;
+            break;
+          }
+        }
+      }
+
+      if (areAllAliensDead === true) {
+        playerWon = true;
       }
     }
 
