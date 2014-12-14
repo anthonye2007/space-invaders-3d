@@ -249,7 +249,7 @@
                   // move all aliens down one row
                   otherAlien.translation.y -= spacing;
 
-                  if (otherAlien.translation.y <= -1) {
+                  if (otherAlien.translation.y <= -1 && otherAlien.isActive !== false) {
                     log("You lost...");
                     // alert doesn't always pop up...
                     alert("You lost...");
