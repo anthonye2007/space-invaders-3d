@@ -219,6 +219,32 @@
 
     function moveCannonBullet() {
       function checkForCollisionWithAliens() {
+        function checkYCollision(alien, bullet) {
+          // FIXME y check might not be perfect, not sure how to test
+          var alienHeight = 0.25;
+          var alienBottom = alien.translation.y;
+          var alienTop = alienBottom + alienHeight;
+
+          var bulletBottomInitialYPosition = -0.5;
+          var bulletBottom = bullet.translation.y + bulletBottomInitialYPosition;
+          var bulletHeight = 0.2;
+          var bulletTop = bulletBottom + bulletHeight;
+
+          return bulletTop > alienBottom && bulletBottom < alienTop;
+        }
+
+        function checkXCollision(alien, bullet) {
+          var bulletLength = 0.1;
+          var bulletLeft = bullet.translation.x;
+          var bulletRight = bulletLeft + bulletLength;
+
+          var alienLength = 0.25;
+          var alienLeft = alien.translation.x;
+          var alienRight = alienLeft + alienLength;
+
+          return bulletLeft <= alienRight && bulletRight >= alienLeft
+        }
+
         for (var mesh in allMeshes) {
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
@@ -228,20 +254,10 @@
               continue;
             }
 
-            // if top edge of bullet touches bottom edge of any alien
-            // then remove bullet and alien
+            var isBulletTouchingAlienOnY = checkYCollision(alien, bullet);
 
-            // FIXME need better y checks
-            if ((bullet.translation.y - 0.3) >= alien.translation.y) {
-              var bulletLength = 0.1;
-              var bulletLeft = bullet.translation.x;
-              var bulletRight = bulletLeft + bulletLength;
-
-              var alienLength = 0.25;
-              var alienLeft = alien.translation.x;
-              var alienRight = alienLeft + alienLength;
-
-              if (bulletLeft <= alienRight && bulletRight >= alienLeft) {
+            if (isBulletTouchingAlienOnY) {
+              if (checkXCollision(alien, bullet)) {
                 log("Collision!!");
                 resetCannonBullet();
                 alien.isActive = false;
