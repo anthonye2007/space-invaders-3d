@@ -159,28 +159,51 @@
     }
 
     function drawScene() {
+      moveCannon();
+      launchCannonBullet();
+      moveCannonBullet();
+
+      moveAllAliens();
+
+      resetScene();
+      renderAllObjects();
+
+      elapsedTime += 15;
+      setTimeout(drawScene, 15);
+    }
+
+    function moveCannon() {
+      function adjustCannon(axis, amount) {
+        if (axis === 'x') {
+          allMeshes.cannon_bottom.translation.x += amount;
+          allMeshes.cannon_top.translation.x += amount;
+        } else if (axis === 'z') {
+          allMeshes.cannon_bottom.translation.z += amount;
+          allMeshes.cannon_top.translation.z += amount;
+        } else {
+          alert('bad axis when adjusting cannon');
+        }
+      }
+
       if (cannon_move.left === true) {
-        allMeshes.cannon_bottom.translation.x -= 1;
-        allMeshes.cannon_top.translation.x -= 1;
+        adjustCannon('x', -1);
         cannon_move.left = false;
       }
       if (cannon_move.right === true) {
-        allMeshes.cannon_bottom.translation.x += 1;
-        allMeshes.cannon_top.translation.x += 1;
+        adjustCannon('x', 1);
         cannon_move.right = false;
       }
       if (cannon_move.away === true) {
-        allMeshes.cannon_bottom.translation.z -= 1;
-        allMeshes.cannon_top.translation.z -= 1;
+        adjustCannon('z', -1);
         cannon_move.away = false;
       }
       if (cannon_move.towards === true) {
-        allMeshes.cannon_bottom.translation.z += 1;
-        allMeshes.cannon_top.translation.z += 1;
+        adjustCannon('z', 1);
         cannon_move.towards = false;
       }
+    }
 
-      // launch cannon bullet
+    function launchCannonBullet() {
       if (cannon_move.fire === true) {
         // only allow one bullet on screen at a time
         if (allMeshes.cannon_bullet.isActive === false) {
@@ -192,25 +215,23 @@
 
         cannon_move.fire = false;
       }
+    }
 
-      // move cannon bullet
-      if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
-        var bullet = allMeshes.cannon_bullet;
-        bullet.translation.y += 0.01;
-
-        // stop bullet if reach upper boundary
-        if (bullet.translation.y >= 2) {
-          resetCannonBullet();
-        }
-
-        // stop bullet if hit alien
+    function moveCannonBullet() {
+      function checkForCollisionWithAliens() {
         for (var mesh in allMeshes) {
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
 
+            // only check active aliens
+            if (alien.isActive === false) {
+              continue;
+            }
+
             // if top edge of bullet touches bottom edge of any alien
             // then remove bullet and alien
 
+            // FIXME need better y checks
             if ((bullet.translation.y - 0.3) >= alien.translation.y) {
               var bulletLength = 0.1;
               var bulletLeft = bullet.translation.x;
@@ -230,7 +251,20 @@
         }
       }
 
-      // make aliens move
+      if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
+        var bullet = allMeshes.cannon_bullet;
+        bullet.translation.y += 0.01;
+
+        // stop bullet if reach upper boundary
+        if (bullet.translation.y >= 2) {
+          resetCannonBullet();
+        }
+
+        checkForCollisionWithAliens();
+      }
+    }
+
+    function moveAllAliens() {
       if (elapsedTime >= alienMovementTime) {
         elapsedTime = 0;
 
@@ -274,20 +308,20 @@
           }
         }
       }
+    }
 
-      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+    function renderAllObjects() {
       for (var mesh in allMeshes) {
         object = allMeshes[mesh];
-        if (object.isActive === undefined || object.isActive === true) {
+        if (object.isActive !== false) {
           render(object);
         }
       }
+    }
 
-      elapsedTime += 15;
-
-      setTimeout(drawScene, 15);
+    function resetScene() {
+      gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     }
 
     function resetCannonBullet() {
