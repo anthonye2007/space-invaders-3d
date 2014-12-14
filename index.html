@@ -55,6 +55,8 @@
     var elapsedTime = 0;
     var alienMovementTime = 500; // ms
 
+    var playerWon = undefined;
+
     var cannon_move = {
       left: false,
       right: false,
@@ -169,7 +171,10 @@
       renderAllObjects();
 
       elapsedTime += 15;
-      setTimeout(drawScene, 15);
+
+      if (playerWon === undefined) {
+        setTimeout(drawScene, 15);
+      }
     }
 
     function moveCannon() {
@@ -300,6 +305,7 @@
                   otherAlien.translation.y -= spacing;
 
                   if (otherAlien.translation.y <= -1 && otherAlien.isActive !== false) {
+                    playerWon = false;
                     log("You lost...");
                     // alert doesn't always pop up...
                     alert("You lost...");
