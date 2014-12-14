@@ -195,16 +195,42 @@
 
       // move cannon bullet
       if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
-        allMeshes.cannon_bullet.translation.y += 0.01;
+        var bullet = allMeshes.cannon_bullet;
+        bullet.translation.y += 0.01;
 
         // stop bullet if reach upper boundary
-        if (allMeshes.cannon_bullet.translation.y >= 2) {
-          allMeshes.cannon_bullet.isActive = false;
-          allMeshes.cannon_bullet.translation.y = allMeshes.cannon_top.translation.y;
+        if (bullet.translation.y >= 2) {
+          resetCannonBullet();
+        }
+
+        // stop bullet if hit alien
+        for (var mesh in allMeshes) {
+          if (isAlien(mesh)) {
+            alien = allMeshes[mesh];
+
+            // if top edge of bullet touches bottom edge of any alien
+            // then remove bullet and alien
+
+            if ((bullet.translation.y - 0.3) >= alien.translation.y) {
+              var bulletLength = 0.1;
+              var bulletLeft = bullet.translation.x;
+              var bulletRight = bulletLeft + bulletLength;
+
+              var alienLength = 0.25;
+              var alienLeft = alien.translation.x;
+              var alienRight = alienLeft + alienLength;
+
+              if (bulletLeft <= alienRight && bulletRight >= alienLeft) {
+                log("Collision!!");
+                resetCannonBullet();
+                alien.isActive = false;
+              }
+            }
+          }
         }
       }
 
-      // make aliens move every 500ms
+      // make aliens move
       if (elapsedTime >= alienMovementTime) {
         elapsedTime = 0;
 
@@ -216,7 +242,6 @@
 
             // check if at edge of screen
             if ((alien.direction > 0 && alien.translation.x >= 2.5) || (alien.direction < 0 && alien.translation.x <= -2.5)) {
-              log("Direction: " + alien.direction + "\tx: " + alien.translation.x);
               for (var obj in allMeshes) {
                 if (isAlien(obj)) {
                   otherAlien = allMeshes[obj];
@@ -225,6 +250,8 @@
                   otherAlien.translation.y -= spacing;
 
                   if (otherAlien.translation.y <= -1) {
+                    log("You lost...");
+                    // alert doesn't always pop up...
                     alert("You lost...");
                     return;
                   }
@@ -244,7 +271,6 @@
             }
 
             alien.translation.x += spacing * alien.direction;
-            //log(alien.translation.x);
           }
         }
       }
@@ -262,6 +288,12 @@
       elapsedTime += 15;
 
       setTimeout(drawScene, 15);
+    }
+
+    function resetCannonBullet() {
+      bullet = allMeshes.cannon_bullet;
+      bullet.isActive = false;
+      bullet.translation.y = allMeshes.cannon_top.translation.y;
     }
 
     function initGL(canvas) {
@@ -419,6 +451,7 @@
       };
     }
 
+     // TODO programmatically create aliens in this object
     function downloadMeshes(filename) {
       OBJ.downloadMeshes({
         'floor': "floor.obj",
