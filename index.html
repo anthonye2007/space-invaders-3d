@@ -111,6 +111,7 @@
       const BLUE = [0, 0, 1, 1.0];
       const WHITE = [1, 1, 1, 1.0];
       const BLACK = [0, 0, 0, 1.0];
+      const LIGHT_RED = [0.6, 0, 0, 1];
 
       colors = [];
 
@@ -133,6 +134,10 @@
 
       case 'black':
         doColorMesh(BLACK);
+        break;
+
+      case 'light-red':
+        doColorMesh(LIGHT_RED);
         break;
 
       default:
@@ -174,6 +179,8 @@
       moveCannonBullet();
 
       moveAllAliens();
+      launchAlienBullet();
+      moveAlienBullets();
 
       checkForPlayerWin();
 
@@ -257,6 +264,94 @@
         }
 
         cannon_move.fire = false;
+      }
+    }
+
+    function launchAlienBullet() {
+      if (elapsedTime % 500 === 0 && allMeshes && !allMeshes.alien_bullet.isActive) {
+        // pick random alien in bottom row
+
+        // count aliens
+        var numBottomAliensActive
+        for (var mesh in allMeshes) {
+          if (isAlien(mesh)) {
+            var alien = allMeshes[mesh];
+            if (alien.isBottomRow && alien.isActive !== false) {
+              numBottomAliensActive++;
+
+              var bullet = allMeshes.alien_bullet;
+              bullet.translation.x = alien.translation.x;
+              bullet.translation.y = alien.translation.y + 1;
+
+              bullet.isActive = true;
+              break; // launch from first alien in bottom row for now
+            }
+          }
+        }
+
+        allMeshes.alien_bullet.isActive = true;
+      }
+    }
+
+    function moveAlienBullets() {
+      function checkForCollisionWithBarrier() {
+        function checkYCollision(barrierObj, bulletObj) {
+          // FIXME y check might not be perfect, not sure how to test
+          var barrierHeight = 0.5;
+          var barrierBottomInitialPosition = -1;
+          var barrierBottom = barrierObj.translation.y + barrierBottomInitialPosition;
+          var barrierTop = barrierBottom + barrierHeight;
+
+          var bulletBottomInitialYPosition = -1.25;
+          var bulletBottom = bulletObj.translation.y + bulletBottomInitialYPosition;
+          var bulletHeight = 0.2;
+          var bulletTop = bulletBottom + bulletHeight;
+
+          return bulletTop > barrierBottom && bulletBottom < barrierTop;
+        }
+
+        function checkXCollision(barrierObj, bulletObj) {
+          var bulletWidth = 0.1;
+          var bulletLeft = bulletObj.translation.x;
+          var bulletRight = bulletLeft + bulletWidth;
+
+          var barrierWidth = 1;
+          var barrierInitialLeftPosition = -0.5;
+          var barrierLeft = barrierObj.translation.x + barrierInitialLeftPosition;
+          var barrierRight = barrierLeft + barrierWidth;
+
+          return bulletLeft <= barrierRight && bulletRight >= barrierLeft;
+        }
+
+        for (var mesh in allMeshes) {
+          if (isBarrier(mesh)) {
+            var barrier = allMeshes[mesh];
+
+            var isBulletTouchingBarrierOnY = checkYCollision(barrier, bullet);
+
+            if (isBulletTouchingBarrierOnY) {
+              if (checkXCollision(barrier, bullet)) {
+                log("Collision with barrier");
+                bullet.isActive = false;
+              }
+            }
+          }
+        }
+      }
+
+      if (allMeshes !== undefined && allMeshes.alien_bullet !== undefined && allMeshes.alien_bullet.isActive === true) {
+        var bullet = allMeshes.alien_bullet;
+        bullet.translation.y -= 0.05;
+
+        // stop bullet if reach lower boundary
+        if (bullet.translation.y < -2.5) {
+          bullet.isActive = false;
+          // TODO reset translation
+        }
+
+        //checkForCollisionWithAliens();
+        checkForCollisionWithBarrier();
+        //checkForCollisionWithCannon();
       }
     }
 
@@ -407,7 +502,7 @@
                   otherAlien.direction *= -1;
 
                   // and increase movement speed
-                  alienMovementTime -= 100;
+                  alienMovementTime -= 30;
 
                   // put lower bound on movement speed
                   if (alienMovementTime < 300) {
@@ -550,6 +645,10 @@
       meshes.cannon_bullet.color = 'white';
       meshes.cannon_bullet.isActive = false;
 
+      meshes.alien_bullet.name = 'alien_bullet';
+      meshes.alien_bullet.color = 'light-red';
+      meshes.alien_bullet.isActive = false;
+
       var numAliens = 0;
       for (var mesh in meshes) {
         if (isAlien(mesh)) {
@@ -603,10 +702,12 @@
           // put 0th alien at top left
           alien = meshes[mesh];
 
-          // 10 aliens per row
-
           alien.translation.x = xAlienStart + (alien.alienPosition % numAliensPerRow) * spacingBtwnAliens;
           alien.translation.y = yAlienStart - Math.floor(alien.alienPosition / numAliensPerRow) * rowSpacing;
+
+          if (alien.alienPosition >= numAliensPerRow) {
+            alien.isBottomRow = true;
+          }
         }
       }
 
@@ -614,7 +715,7 @@
     }
 
     function isAlien(mesh) {
-      return containsStr(mesh, 'alien');
+      return containsStr(mesh, 'alien') && !containsStr(mesh, 'bullet');
     }
 
     function isBarrier(mesh) {
@@ -645,6 +746,7 @@
       'cannon_bottom': "cannon_bottom.obj",
       'cannon_top': "cannon_top.obj",
       'cannon_bullet': "cannon_bullet.obj",
+      'alien_bullet': 'cannon_bullet.obj',
       'barrier': "barrier.obj",
       'barrier2': "barrier.obj",
       'barrier3': "barrier.obj"
