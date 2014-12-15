@@ -543,9 +543,6 @@
       meshes.cannon_bullet.color = 'white';
       meshes.cannon_bullet.isActive = false;
 
-      meshes.barrier.name = 'barrier';
-      meshes.barrier.color = 'green';
-
       var numAliens = 0;
       for (var mesh in meshes) {
         if (isAlien(mesh)) {
@@ -560,8 +557,33 @@
         }
       }
 
+      var numBarriers = 0;
+      for (var mesh in meshes) {
+        if (isBarrier(mesh)) {
+          var barrier = meshes[mesh];
+
+          barrier.name = 'barrier' + numBarriers;
+          barrier.color = 'green';
+          barrier.numBarrier = numBarriers;
+
+          numBarriers++;
+        }
+      }
+
       for (var mesh in meshes) {
         loadMesh(meshes[mesh]);
+      }
+
+      for (var mesh in meshes) {
+        if (isBarrier(mesh)) {
+          var barrier = meshes[mesh];
+
+          barrier.translation = {
+            x: -2 + 2 * barrier.numBarrier,
+            y: 0.2,
+            z: -4
+          }
+        }
       }
 
       meshes.barrier.translation = {
@@ -623,6 +645,8 @@
         'cannon_top': "cannon_top.obj",
         'cannon_bullet': "cannon_bullet.obj",
         'barrier': "barrier.obj",
+        'barrier2': "barrier.obj",
+        'barrier3': "barrier.obj",
         'alien': "alien.obj",
         'alien2': "alien.obj"
       }, initMeshFromHtml);
