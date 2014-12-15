@@ -223,20 +223,22 @@
         }
       }
 
+      var magnitude = 0.25;
+
       if (cannon_move.left === true) {
-        adjustCannon('x', -1);
+        adjustCannon('x', -magnitude);
         cannon_move.left = false;
       }
       if (cannon_move.right === true) {
-        adjustCannon('x', 1);
+        adjustCannon('x', magnitude);
         cannon_move.right = false;
       }
       if (cannon_move.away === true) {
-        adjustCannon('z', -1);
+        //adjustCannon('z', -1);
         cannon_move.away = false;
       }
       if (cannon_move.towards === true) {
-        adjustCannon('z', 1);
+        //adjustCannon('z', 1);
         cannon_move.towards = false;
       }
     }
@@ -367,20 +369,24 @@
       if (elapsedTime >= alienMovementTime) {
         elapsedTime = 0;
 
+        // need to move all down at once and then don't move in x that 'turn'
+
+        // check to see if at edge of screen
+        var didMoveDown = false;
+
         for (var mesh in allMeshes) {
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
 
-            var spacing = 0.5;
-
-            // check if at edge of screen
             if ((alien.direction > 0 && alien.translation.x >= 2.5) || (alien.direction < 0 && alien.translation.x <= -2.5)) {
+              didMoveDown = true;
+
               for (var obj in allMeshes) {
                 if (isAlien(obj)) {
                   otherAlien = allMeshes[obj];
 
                   // move all aliens down one row
-                  otherAlien.translation.y -= spacing;
+                  otherAlien.translation.y -= 0.3;
 
                   if (otherAlien.translation.y <= -1 && otherAlien.isActive !== false) {
                     playerWon = false;
@@ -403,8 +409,19 @@
                 }
               }
             }
+          }
+        }
 
-            alien.translation.x += spacing * alien.direction;
+        // if did not move down, then move sideways
+
+        if (didMoveDown) {
+          return;
+        }
+
+        for (var mesh in allMeshes) {
+          if (isAlien(mesh)) {
+            alien = allMeshes[mesh];
+            alien.translation.x += 0.5 * alien.direction;
           }
         }
       }
@@ -527,7 +544,7 @@
       meshes.cannon_bullet.isActive = false;
 
       meshes.barrier.name = 'barrier';
-      meshes.barrier.color = 'red';
+      meshes.barrier.color = 'green';
 
       var numAliens = 0;
       for (var mesh in meshes) {
