@@ -107,8 +107,9 @@
       const GREEN = [0, 1, 0, 1.0];
       const BLUE = [0, 0, 1, 1.0];
       const WHITE = [1, 1, 1, 1.0];
+      const BLACK = [0, 0, 0, 1.0];
 
-      colors = []
+      colors = [];
 
       switch (mesh.color) {
       case 'red':
@@ -127,6 +128,10 @@
         doColorMesh(WHITE);
         break;
 
+      case 'black':
+        doColorMesh(BLACK);
+        break;
+
       default:
         colorRedAndGreen();
         break;
@@ -142,7 +147,7 @@
     function render(mesh) {
       mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
       mat4.identity(mvMatrix);
-      mat4.translate(mvMatrix, [mesh.translation.x, mesh.translation.y, mesh.translation.z]);
+      mat4.translate(mvMatrix, [mesh.translation.x, mesh.translation.y, mesh.translation.z - 5]);
 
       mat4.rotate(mvMatrix, degToRad(xRot), [1, 0, 0]);
       mat4.rotate(mvMatrix, degToRad(yRot), [0, 1, 0]);
@@ -512,7 +517,7 @@
       meshes.cannon_bottom.name = 'cannon_bottom';
       meshes.cannon_top.name = 'cannon_top';
 
-      meshes.floor.color = 'green';
+      meshes.floor.color = 'black';
       meshes.cannon_bottom.color = 'blue';
       meshes.cannon_top.color = 'blue';
 
