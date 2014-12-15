@@ -637,19 +637,25 @@
       };
     }
 
+    var meshesToDownload = {
+      'floor': "floor.obj",
+      'cannon_bottom': "cannon_bottom.obj",
+      'cannon_top': "cannon_top.obj",
+      'cannon_bullet': "cannon_bullet.obj",
+      'barrier': "barrier.obj",
+      'barrier2': "barrier.obj",
+      'barrier3': "barrier.obj"
+    };
+
      // TODO programmatically create aliens in this object
+    var numAliensToCreate = 2;
+    for (var i = 0; i < numAliensToCreate; i++) {
+      var propertyName = 'alien' + i;
+      meshesToDownload[propertyName] = "alien.obj"
+    }
+
     function downloadMeshes(filename) {
-      OBJ.downloadMeshes({
-        'floor': "floor.obj",
-        'cannon_bottom': "cannon_bottom.obj",
-        'cannon_top': "cannon_top.obj",
-        'cannon_bullet': "cannon_bullet.obj",
-        'barrier': "barrier.obj",
-        'barrier2': "barrier.obj",
-        'barrier3': "barrier.obj",
-        'alien': "alien.obj",
-        'alien2': "alien.obj"
-      }, initMeshFromHtml);
+      OBJ.downloadMeshes(meshesToDownload, initMeshFromHtml);
     }
 
     function webGLStart() {
