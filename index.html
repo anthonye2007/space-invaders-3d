@@ -356,10 +356,10 @@
 
       if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
         var bullet = allMeshes.cannon_bullet;
-        bullet.translation.y += 0.05;
+        bullet.translation.y += 0.1;
 
         // stop bullet if reach upper boundary
-        if (bullet.translation.y >= 2.5) {
+        if (bullet.translation.y >= 4.75) {
           resetCannonBullet();
         }
 
@@ -380,6 +380,10 @@
         for (var mesh in allMeshes) {
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
+
+            if (alien.isActive === false) {
+              continue;
+            }
 
             if ((alien.direction > 0 && alien.translation.x >= 6) || (alien.direction < 0 && alien.translation.x <= -6)) {
               didMoveDown = true;
