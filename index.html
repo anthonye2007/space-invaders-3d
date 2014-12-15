@@ -381,7 +381,7 @@
           if (isAlien(mesh)) {
             alien = allMeshes[mesh];
 
-            if ((alien.direction > 0 && alien.translation.x >= 2.5) || (alien.direction < 0 && alien.translation.x <= -2.5)) {
+            if ((alien.direction > 0 && alien.translation.x >= 6) || (alien.direction < 0 && alien.translation.x <= -6)) {
               didMoveDown = true;
 
               for (var obj in allMeshes) {
@@ -595,8 +595,8 @@
         z: -4
       };
 
-      var xAlienStart = -3;
-      var yAlienStart = 1;
+      var xAlienStart = -6;
+      var yAlienStart = 3;
 
       // translate all aliens
       var numAliensPerRow = 10;
