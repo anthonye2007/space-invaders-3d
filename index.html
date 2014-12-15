@@ -262,7 +262,7 @@
           var alienBottom = alienObj.translation.y;
           var alienTop = alienBottom + alienHeight;
 
-          var bulletBottomInitialYPosition = -0.5;
+          var bulletBottomInitialYPosition = -1.25;
           var bulletBottom = bulletObj.translation.y + bulletBottomInitialYPosition;
           var bulletHeight = 0.2;
           var bulletTop = bulletBottom + bulletHeight;
@@ -271,9 +271,9 @@
         }
 
         function checkXCollision(alienObj, alienLength, bulletObj) {
-          var bulletLength = 0.1;
+          var bulletWidth = 0.1;
           var bulletLeft = bulletObj.translation.x;
-          var bulletRight = bulletLeft + bulletLength;
+          var bulletRight = bulletLeft + bulletWidth;
 
           var alienLeft = alienObj.translation.x;
           var alienRight = alienLeft + alienLength;
@@ -312,7 +312,7 @@
           var barrierBottom = barrierObj.translation.y + barrierBottomInitialPosition;
           var barrierTop = barrierBottom + barrierHeight;
 
-          var bulletBottomInitialYPosition = -0.5;
+          var bulletBottomInitialYPosition = -1.25;
           var bulletBottom = bulletObj.translation.y + bulletBottomInitialYPosition;
           var bulletHeight = 0.2;
           var bulletTop = bulletBottom + bulletHeight;
@@ -321,12 +321,13 @@
         }
 
         function checkXCollision(barrierObj, bulletObj) {
-          var bulletLength = 0.1;
+          var bulletWidth = 0.1;
           var bulletLeft = bulletObj.translation.x;
-          var bulletRight = bulletLeft + bulletLength;
+          var bulletRight = bulletLeft + bulletWidth;
 
           var barrierWidth = 1;
-          var barrierLeft = barrierObj.translation.x;
+          var barrierInitialLeftPosition = -0.5;
+          var barrierLeft = barrierObj.translation.x + barrierInitialLeftPosition;
           var barrierRight = barrierLeft + barrierWidth;
 
           return bulletLeft <= barrierRight && bulletRight >= barrierLeft;
@@ -350,10 +351,10 @@
 
       if (allMeshes !== undefined && allMeshes.cannon_bullet !== undefined && allMeshes.cannon_bullet.isActive === true) {
         var bullet = allMeshes.cannon_bullet;
-        bullet.translation.y += 0.01;
+        bullet.translation.y += 0.05;
 
         // stop bullet if reach upper boundary
-        if (bullet.translation.y >= 2) {
+        if (bullet.translation.y >= 2.5) {
           resetCannonBullet();
         }
 
@@ -548,12 +549,8 @@
 
       meshes.barrier.translation = {
         x: -2,
-        y: 0.8,
+        y: 0.2,
         z: -4
-      };
-
-      meshes.barrier.initialPosition = {
-        y: 0.8
       };
 
       var xAlienStart = -3;
@@ -565,10 +562,6 @@
         if (isAlien(mesh)) {
           // put 0th alien at top left
           alien = meshes[mesh];
-
-          alien.initialPosition = {
-            y: yAlienStart
-          };
 
           alien.translation.x = xAlienStart + alien.alienPosition * spacing;
           alien.translation.y = yAlienStart;
