@@ -252,30 +252,28 @@
 
     function moveCannonBullet() {
       function checkForCollisionWithAliens() {
-        function checkYCollision(alien, bullet) {
+        function checkYCollision(alienObj, alienHeight, bulletObj) {
           // FIXME y check might not be perfect, not sure how to test
-          var alienHeight = 0.25;
-          var alienBottom = alien.translation.y;
+          var alienBottom = alienObj.translation.y;
           var alienTop = alienBottom + alienHeight;
 
           var bulletBottomInitialYPosition = -0.5;
-          var bulletBottom = bullet.translation.y + bulletBottomInitialYPosition;
+          var bulletBottom = bulletObj.translation.y + bulletBottomInitialYPosition;
           var bulletHeight = 0.2;
           var bulletTop = bulletBottom + bulletHeight;
 
           return bulletTop > alienBottom && bulletBottom < alienTop;
         }
 
-        function checkXCollision(alien, bullet) {
+        function checkXCollision(alienObj, alienLength, bulletObj) {
           var bulletLength = 0.1;
-          var bulletLeft = bullet.translation.x;
+          var bulletLeft = bulletObj.translation.x;
           var bulletRight = bulletLeft + bulletLength;
 
-          var alienLength = 0.25;
-          var alienLeft = alien.translation.x;
+          var alienLeft = alienObj.translation.x;
           var alienRight = alienLeft + alienLength;
 
-          return bulletLeft <= alienRight && bulletRight >= alienLeft
+          return bulletLeft <= alienRight && bulletRight >= alienLeft;
         }
 
         for (var mesh in allMeshes) {
@@ -287,13 +285,58 @@
               continue;
             }
 
-            var isBulletTouchingAlienOnY = checkYCollision(alien, bullet);
+            var alienSideLength = 0.25
+            var isBulletTouchingAlienOnY = checkYCollision(alien, alienSideLength, bullet);
 
             if (isBulletTouchingAlienOnY) {
-              if (checkXCollision(alien, bullet)) {
+              if (checkXCollision(alien, alienSideLength, bullet)) {
                 log("Collision!!");
                 resetCannonBullet();
                 alien.isActive = false;
+              }
+            }
+          }
+        }
+      }
+
+      function checkForCollisionWithBarrier() {
+        function checkYCollision(barrierObj, bulletObj) {
+          // FIXME y check might not be perfect, not sure how to test
+          var barrierHeight = 0.5;
+          var barrierBottomInitialPosition = -1;
+          var barrierBottom = barrierObj.translation.y + barrierBottomInitialPosition;
+          var barrierTop = barrierBottom + barrierHeight;
+
+          var bulletBottomInitialYPosition = -0.5;
+          var bulletBottom = bulletObj.translation.y + bulletBottomInitialYPosition;
+          var bulletHeight = 0.2;
+          var bulletTop = bulletBottom + bulletHeight;
+
+          return bulletTop > barrierBottom && bulletBottom < barrierTop;
+        }
+
+        function checkXCollision(barrierObj, bulletObj) {
+          var bulletLength = 0.1;
+          var bulletLeft = bulletObj.translation.x;
+          var bulletRight = bulletLeft + bulletLength;
+
+          var barrierWidth = 1;
+          var barrierLeft = barrierObj.translation.x;
+          var barrierRight = barrierLeft + barrierWidth;
+
+          return bulletLeft <= barrierRight && bulletRight >= barrierLeft;
+        }
+
+        for (var mesh in allMeshes) {
+          if (isBarrier(mesh)) {
+            var barrier = allMeshes[mesh];
+
+            var isBulletTouchingBarrierOnY = checkYCollision(barrier, bullet);
+
+            if (isBulletTouchingBarrierOnY) {
+              if (checkXCollision(barrier, bullet)) {
+                log("Collision with barrier");
+                resetCannonBullet();
               }
             }
           }
@@ -310,6 +353,7 @@
         }
 
         checkForCollisionWithAliens();
+        checkForCollisionWithBarrier();
       }
     }
 
@@ -476,6 +520,9 @@
       meshes.cannon_bullet.color = 'white';
       meshes.cannon_bullet.isActive = false;
 
+      meshes.barrier.name = 'barrier';
+      meshes.barrier.color = 'red';
+
       var numAliens = 0;
       for (var mesh in meshes) {
         if (isAlien(mesh)) {
@@ -494,6 +541,16 @@
         loadMesh(meshes[mesh]);
       }
 
+      meshes.barrier.translation = {
+        x: -2,
+        y: 0.8,
+        z: -4
+      };
+
+      meshes.barrier.initialPosition = {
+        y: 0.8
+      };
+
       var xAlienStart = -3;
       var yAlienStart = 1;
       var spacing = 0.5
@@ -503,6 +560,10 @@
         if (isAlien(mesh)) {
           // put 0th alien at top left
           alien = meshes[mesh];
+
+          alien.initialPosition = {
+            y: yAlienStart
+          };
 
           alien.translation.x = xAlienStart + alien.alienPosition * spacing;
           alien.translation.y = yAlienStart;
@@ -514,6 +575,10 @@
 
     function isAlien(mesh) {
       return containsStr(mesh, 'alien');
+    }
+
+    function isBarrier(mesh) {
+      return containsStr(mesh, 'barrier');
     }
 
     function containsStr(first, other) {
@@ -542,6 +607,7 @@
         'cannon_bottom': "cannon_bottom.obj",
         'cannon_top': "cannon_top.obj",
         'cannon_bullet': "cannon_bullet.obj",
+        'barrier': "barrier.obj",
         'alien': "alien.obj",
         'alien2': "alien.obj"
       }, initMeshFromHtml);
